@@ -4,8 +4,6 @@ import test.utilities.TestData;
 import test.api.model.ZippopotamResponse;
 import test.api.model.Place;
 import io.qameta.allure.Description;
-import io.qameta.allure.Severity;
-import io.qameta.allure.SeverityLevel;
 import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -45,7 +43,6 @@ public class ZippopotamApiTest {
     }
 
     @Test(dataProvider = "apiData")
-    @Severity(SeverityLevel.CRITICAL)
     @Description("Validate Zippopotam.us behavior using external CSV test data.")
     public void postalCodeApiContract(String testCase, String country, String postalCode,
                                       int expectedStatus, String expectedCountry,
@@ -81,7 +78,6 @@ public class ZippopotamApiTest {
     }
 
     @Test
-    @Severity(SeverityLevel.NORMAL)
     @Description("Verify country code is accepted in lowercase using CSV data.")
     public void countryCodeIsCaseInsensitive() {
         Map<String, String> row = TestData.api().stream()
@@ -99,7 +95,6 @@ public class ZippopotamApiTest {
     }
 
     @Test
-    @Severity(SeverityLevel.NORMAL)
     @Description("Verify the valid API responds within the agreed automation threshold.")
     public void responseTimeIsWithinThreshold() {
         Map<String, String> row = TestData.api().stream()
