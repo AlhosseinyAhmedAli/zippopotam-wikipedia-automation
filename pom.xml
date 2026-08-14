@@ -8,7 +8,7 @@
     <artifactId>zippopotam-wikipedia-automation</artifactId>
     <version>1.0.0</version>
     <properties>
-        <maven.compiler.release>25</maven.compiler.release>
+        <maven.compiler.release>26</maven.compiler.release>
         
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <cucumber.version>7.34.4</cucumber.version>
@@ -104,7 +104,7 @@
                         <configuration>
                             <rules>
                                 <requireJavaVersion>
-                                    <version>[25,26)</version>
+                                    <version>[26,27)</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>

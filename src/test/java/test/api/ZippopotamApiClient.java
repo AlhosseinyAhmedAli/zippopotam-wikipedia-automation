@@ -23,8 +23,4 @@ public class ZippopotamApiClient {
                 .get(url);
     }
 
-    public ZippopotamResponse getByPostalCodeAsPojo(String country, String postalCode) {
-        Response response = getByPostalCode(country, postalCode);
-        return response.as(ZippopotamResponse.class);
-    }
 }
