@@ -1,6 +1,8 @@
 package test.api;
 
 import test.utilities.TestData;
+import test.api.model.ZippopotamResponse;
+import test.api.model.Place;
 import io.qameta.allure.Description;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
@@ -58,22 +60,22 @@ public class ZippopotamApiTest {
             return;
         }
 
-        Map<String, Object> root = response.as(Map.class);
-        Assert.assertEquals(root.get("post code"), postalCode, "post code");
-        assertCountryEquals(String.valueOf(root.get("country")), expectedCountry);
-        Assert.assertEquals(root.get("country abbreviation"), expectedAbbreviation,
+        ZippopotamResponse root = response.as(ZippopotamResponse.class);
+                Assert.assertEquals(root.getPostCode(), postalCode, "post code");
+                assertCountryEquals(root.getCountry(), expectedCountry);
+                Assert.assertEquals(root.getCountryAbbreviation(), expectedAbbreviation,
                 "country abbreviation");
 
-        List<Map<String, Object>> places = (List<Map<String, Object>>) root.get("places");
+                List<Place> places = root.getPlaces();
         Assert.assertNotNull(places, "places must exist");
         Assert.assertFalse(places.isEmpty(), "places must not be empty");
 
-        for (Map<String, Object> place : places) {
-            Assert.assertNotNull(place.get("place name"), "place name is missing");
-            Assert.assertNotNull(place.get("state"), "state is missing");
-            Assert.assertTrue(place.get("latitude").toString().matches("-?\\d+(\\.\\d+)?"),
+                for (Place place : places) {
+                    Assert.assertNotNull(place.getPlaceName(), "place name is missing");
+                    Assert.assertNotNull(place.getState(), "state is missing");
+                    Assert.assertTrue(place.getLatitude().toString().matches("-?\\d+(\\.\\d+)?"),
                     "Invalid latitude");
-            Assert.assertTrue(place.get("longitude").toString().matches("-?\\d+(\\.\\d+)?"),
+                    Assert.assertTrue(place.getLongitude().toString().matches("-?\\d+(\\.\\d+)?"),
                     "Invalid longitude");
         }
     }
@@ -91,9 +93,9 @@ public class ZippopotamApiTest {
                 row.get("country").toLowerCase(), row.get("postalCode"));
 
         Assert.assertEquals(response.statusCode(), Integer.parseInt(row.get("expectedStatus")));
-        Map<String, Object> root = response.as(Map.class);
-        assertCountryEquals(String.valueOf(root.get("country")), row.get("expectedCountry"));
-        Assert.assertEquals(root.get("country abbreviation"), row.get("expectedAbbreviation"));
+        ZippopotamResponse root = response.as(ZippopotamResponse.class);
+                assertCountryEquals(root.getCountry(), row.get("expectedCountry"));
+                Assert.assertEquals(root.getCountryAbbreviation(), row.get("expectedAbbreviation"));
     }
 
     @Test

@@ -2,6 +2,7 @@ package test.api;
 
 import test.core.Config;
 import io.restassured.response.Response;
+import test.api.model.ZippopotamResponse;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -20,5 +21,10 @@ public class ZippopotamApiClient {
                 .header("Accept", "application/json")
                 .when()
                 .get(url);
+    }
+
+    public ZippopotamResponse getByPostalCodeAsPojo(String country, String postalCode) {
+        Response response = getByPostalCode(country, postalCode);
+        return response.as(ZippopotamResponse.class);
     }
 }

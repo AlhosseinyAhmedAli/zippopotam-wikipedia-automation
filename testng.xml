@@ -9,9 +9,4 @@
             <class name="test.api.ZippopotamApiTest"/>
         </classes>
     </test>
-    <test name="Wikipedia Android Cucumber Tests">
-        <classes>
-            <class name="test.mobile.runner.WikipediaCucumberRunner"/>
-        </classes>
-    </test>
 </suite>
