@@ -1,0 +1,9 @@
+testCase,country,postalCode,expectedStatus,expectedCountry,expectedAbbreviation
+VALID,US,90210,200,United States,US
+VALID,US,84321,200,United States,US
+VALID,GB,AB1,200,Great Britain,GB
+VALID,DE,01067,200,Germany,DE
+VALID,IN,110001,200,India,IN
+INVALID_POSTAL,US,00000,404,,
+INVALID_COUNTRY,ZZ,12345,404,,
+CASE_INSENSITIVE,US,90210,200,United States,US

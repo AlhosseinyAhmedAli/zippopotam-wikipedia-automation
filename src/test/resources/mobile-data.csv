@@ -1,0 +1,9 @@
+section,key,value
+mobile,appiumUrl,http://127.0.0.1:4723
+mobile,device.name,emulator-5554
+mobile,platform.version,17
+mobile,app.package,org.wikipedia
+mobile,app.activity,org.wikipedia.main.MainActivity
+mobile,automation.name,UiAutomator2
+mobile,article,Artificial Intelligence
+mobile,readingList,QA Automation Assessment
