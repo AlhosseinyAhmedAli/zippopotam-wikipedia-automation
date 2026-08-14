@@ -3,7 +3,6 @@ package test.utilities;
 import java.util.List;
 import java.util.Map;
 
-/** Central access point for CSV test data. */
 public final class TestData {
     private TestData() {
     }
