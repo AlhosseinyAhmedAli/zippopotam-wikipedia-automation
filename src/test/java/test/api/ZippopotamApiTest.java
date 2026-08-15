@@ -6,10 +6,8 @@ import test.api.model.Place;
 import io.qameta.allure.Description;
 import io.restassured.response.Response;
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.ArrayList;
+import org.testng.annotations.DataProvider;
 import java.util.List;
 import java.util.Map;
 
@@ -24,86 +22,86 @@ public class ZippopotamApiTest {
                 "country name mismatch: expected " + expectedCountry + " but found " + actualCountry);
     }
 
-    @DataProvider(name = "apiData")
-    public Object[][] apiData() {
+    @DataProvider(name = "rows")
+    public static Object[][] rowsProvider() {
         List<Map<String, String>> rows = TestData.api();
-        List<Object[]> data = new ArrayList<>();
-        for (Map<String, String> row : rows) {
-            data.add(new Object[]{
-                    row.get("testCase"),
-                    row.get("country"),
-                    row.get("postalCode"),
-                    Integer.parseInt(row.get("expectedStatus")),
-                    row.get("expectedCountry"),
-                    row.get("expectedAbbreviation")
-            });
+        Object[][] out = new Object[rows.size()][1];
+        for (int i = 0; i < rows.size(); i++) {
+            out[i][0] = rows.get(i);
         }
-        return data.toArray(new Object[0][]);
+        return out;
     }
 
-    @Test(dataProvider = "apiData")
+    @Test(dataProvider = "rows")
     @Description("Validate Zippopotam.us behavior using external CSV test data.")
-    public void postalCodeApiContract(String testCase, String country, String postalCode,
-                                      int expectedStatus, String expectedCountry,
-                                      String expectedAbbreviation) {
+    public void postalCodeApiContract(Map<String, String> row) {
+        String testCase = row.get("testCase");
+        String country = row.get("country");
+        String postalCode = row.get("postalCode");
+        int expectedStatus = Integer.parseInt(row.get("expectedStatus"));
+        String expectedCountry = row.get("expectedCountry");
+        String expectedAbbreviation = row.get("expectedAbbreviation");
+
         Response response = client.getByPostalCode(country, postalCode);
 
         Assert.assertEquals(response.statusCode(), expectedStatus,
-                "Unexpected status for " + country + "/" + postalCode +
-                        ". Response: " + response.asString());
+                "Unexpected status for " + country + "/" + postalCode + " (" + testCase + "). Response: " + response.asString());
 
         if (expectedStatus != 200) {
             return;
         }
 
         ZippopotamResponse root = response.as(ZippopotamResponse.class);
-                Assert.assertEquals(root.getPostCode(), postalCode, "post code");
-                assertCountryEquals(root.getCountry(), expectedCountry);
-                Assert.assertEquals(root.getCountryAbbreviation(), expectedAbbreviation,
-                "country abbreviation");
+        Assert.assertEquals(root.getPostCode(), postalCode, "post code (" + testCase + ")");
+        assertCountryEquals(root.getCountry(), expectedCountry);
+        Assert.assertEquals(root.getCountryAbbreviation(), expectedAbbreviation, "country abbreviation (" + testCase + ")");
 
-                List<Place> places = root.getPlaces();
-        Assert.assertNotNull(places, "places must exist");
-        Assert.assertFalse(places.isEmpty(), "places must not be empty");
+        List<Place> places = root.getPlaces();
+        Assert.assertNotNull(places, "places must exist (" + testCase + ")");
+        Assert.assertFalse(places.isEmpty(), "places must not be empty (" + testCase + ")");
 
-                for (Place place : places) {
-                    Assert.assertNotNull(place.getPlaceName(), "place name is missing");
-                    Assert.assertNotNull(place.getState(), "state is missing");
-                    Assert.assertTrue(place.getLatitude().toString().matches("-?\\d+(\\.\\d+)?"),
-                    "Invalid latitude");
-                    Assert.assertTrue(place.getLongitude().toString().matches("-?\\d+(\\.\\d+)?"),
-                    "Invalid longitude");
+        for (Place place : places) {
+            Assert.assertNotNull(place.getPlaceName(), "place name is missing (" + testCase + ")");
+            Assert.assertNotNull(place.getState(), "state is missing (" + testCase + ")");
+            Assert.assertTrue(place.getLatitude().toString().matches("-?\\d+(\\.\\d+)?"),
+                    "Invalid latitude (" + testCase + ")");
+            Assert.assertTrue(place.getLongitude().toString().matches("-?\\d+(\\.\\d+)?"),
+                    "Invalid longitude (" + testCase + ")");
         }
     }
 
-    @Test
+    @Test(dataProvider = "rows")
     @Description("Verify country code is accepted in lowercase using CSV data.")
-    public void countryCodeIsCaseInsensitive() {
-        Map<String, String> row = TestData.api().stream()
-                .filter(r -> "CASE_INSENSITIVE".equals(r.get("testCase")))
-                .findFirst()
-                .orElseThrow();
+    public void countryCodeIsCaseInsensitive(Map<String, String> row) {
+        String testCase = row.get("testCase");
+        String country = row.get("country");
+        String postalCode = row.get("postalCode");
+        int expectedStatus = Integer.parseInt(row.get("expectedStatus"));
+        String expectedCountry = row.get("expectedCountry");
+        String expectedAbbreviation = row.get("expectedAbbreviation");
+        Response response = client.getByPostalCode(country.toLowerCase(), postalCode);
+        Assert.assertEquals(response.statusCode(), expectedStatus,
+                "Lowercase acceptance failed for " + country + "/" + postalCode + " (" + testCase + ")");
 
-        Response response = client.getByPostalCode(
-                row.get("country").toLowerCase(), row.get("postalCode"));
+        if (expectedStatus != 200) {
+            return;
+        }
 
-        Assert.assertEquals(response.statusCode(), Integer.parseInt(row.get("expectedStatus")));
         ZippopotamResponse root = response.as(ZippopotamResponse.class);
-                assertCountryEquals(root.getCountry(), row.get("expectedCountry"));
-                Assert.assertEquals(root.getCountryAbbreviation(), row.get("expectedAbbreviation"));
+        assertCountryEquals(root.getCountry(), expectedCountry);
+        Assert.assertEquals(root.getCountryAbbreviation(), expectedAbbreviation);
     }
 
-    @Test
-    @Description("Verify the valid API responds within the agreed automation threshold.")
-    public void responseTimeIsWithinThreshold() {
-        Map<String, String> row = TestData.api().stream()
-                .filter(r -> "VALID".equals(r.get("testCase")))
-                .findFirst()
-                .orElseThrow();
+    @Test(dataProvider = "rows")
+    @Description("Verify the API responds within the agreed automation threshold.")
+    public void responseTimeIsWithinThreshold(Map<String, String> row) {
+        String country = row.get("country");
+        String postalCode = row.get("postalCode");
+        int expectedStatus = Integer.parseInt(row.get("expectedStatus"));
 
-        client.getByPostalCode(row.get("country"), row.get("postalCode"))
+        client.getByPostalCode(country, postalCode)
                 .then()
-                .statusCode(Integer.parseInt(row.get("expectedStatus")))
+                .statusCode(expectedStatus)
                 .time(lessThan(5000L));
     }
 }
