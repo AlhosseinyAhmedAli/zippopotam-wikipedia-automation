@@ -1,21 +1,19 @@
 package test.mobile.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
 
 public class HomePage extends BasePage {
 
     private final By skip = By.xpath("//*[@text='Skip' or @content-desc='Skip']");
     private final By next = By.xpath("//*[@text='Next' or @content-desc='Next' or @text='Continue' or @content-desc='Continue']");
     private final By searchButton = By.xpath(
-            "//*[@text='Search' or @content-desc='Search' or contains(@content-desc,'Search')]");
-    private final By searchBar = By.xpath(
-            "//*[@text='Search Wikipedia' or @content-desc='Search Wikipedia' or " +
-            "@text='Search for an article' or @content-desc='Search for an article']");
-    private final By searchInput = By.xpath(
-            "//android.widget.EditText[@resource-id='org.wikipedia:id/search_src_text' or " +
-            "@resource-id='org.wikipedia:id/search_input' or @hint='Search Wikipedia']");
+            "//*[@resource-id='org.wikipedia:id/nav_tab_search' or @content-desc='Search' or @text='Search' or " +
+            "contains(@content-desc,'Search')]");
+    private final By searchBar = By.id("org.wikipedia:id/search_container");
+    private final By searchInput = By.id("org.wikipedia:id/search_src_text");
 
-    /** Handles the first-run onboarding: click Skip when it is available. */
     public void skipFirstRun() {
         for (int i = 0; i < 5; i++) {
             if (exists(skip)) {
@@ -30,16 +28,33 @@ public class HomePage extends BasePage {
         }
     }
 
-    /** Exact requested flow: Skip -> Search button -> Search bar -> type article. */
     public void searchFor(String article) {
         skipFirstRun();
 
-        click(searchButton);
-        if (exists(searchBar)) {
-            click(searchBar);
+        try {
+            if (exists(searchButton)) {
+                click(searchButton);
+            } else {
+                tapByAdb(540, 2230);
+            }
+            if (exists(searchBar)) {
+                click(searchBar);
+            }
+            // ensure the search container is visible before locating the input
+            visible(searchBar);
+            WebElement input = visible(searchInput);
+            input.clear();
+            input.sendKeys(article);
+            return;
+        } catch (TimeoutException ignored) {
+            // Fallback for the current Wikipedia app: use the Search tab coordinates directly.
         }
 
-        visible(searchInput).clear();
-        visible(searchInput).sendKeys(article);
+        tapByAdb(540, 2230);
+        // wait for the search container opened by the tap
+        visible(searchBar);
+        WebElement input = visible(searchInput);
+        input.clear();
+        input.sendKeys(article);
     }
 }

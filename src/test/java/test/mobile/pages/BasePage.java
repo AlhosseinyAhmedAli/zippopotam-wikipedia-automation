@@ -7,6 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -66,5 +67,54 @@ public abstract class BasePage {
 
     protected void pressBack() {
         driver().navigate().back();
+    }
+
+    protected void tap(int x, int y) {
+        driver().executeScript("mobile: clickGesture", Map.of(
+                "x", x,
+                "y", y,
+                "duration", 100));
+    }
+
+    protected void tapByAdb(int x, int y) {
+        try {
+            Process process = new ProcessBuilder(
+                    "adb",
+                    "-s",
+                    "emulator-5554",
+                    "shell",
+                    "input",
+                    "tap",
+                    String.valueOf(x),
+                    String.valueOf(y))
+                    .start();
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new IllegalStateException("ADB tap failed at " + x + "," + y + "; exit=" + exitCode);
+            }
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Unable to tap via ADB at " + x + "," + y, e);
+        }
+    }
+
+    protected void launchActivity(String packageName, String activityName) {
+        try {
+            Process process = new ProcessBuilder(
+                    "adb",
+                    "shell",
+                    "am",
+                    "start",
+                    "-n",
+                    packageName + "/" + activityName)
+                    .start();
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new IllegalStateException("Unable to launch activity " + packageName + "/" + activityName + "; adb exit code=" + exitCode);
+            }
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Unable to launch activity " + packageName + "/" + activityName, e);
+        }
     }
 }
