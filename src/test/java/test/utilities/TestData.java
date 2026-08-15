@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class TestData {
-    private TestData() {
-    }
 
     public static List<Map<String, String>> api() {
         return CsvReader.read("api-data.csv");

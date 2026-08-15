@@ -10,7 +10,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Reusable CSV reader for test data stored under src/test/resources. */
 public final class CsvReader {
     private CsvReader() {}
 
