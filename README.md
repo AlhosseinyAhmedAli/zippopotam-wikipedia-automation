@@ -11,6 +11,6 @@ Java automation framework for the assessment, focused on:
 * Failure screenshots attached to Allure
 * Cucumber HTML/JSON + Allure reporting
 * Android Studio Emulator + local Appium
-* Maven / Java 25 project configuration
+* Maven / Java 26 project configuration
 
 ```
