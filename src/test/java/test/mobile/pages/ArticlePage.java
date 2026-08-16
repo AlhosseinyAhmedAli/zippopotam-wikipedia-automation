@@ -39,14 +39,12 @@ public class ArticlePage extends BasePage {
             return true;
         }
 
-        // Try a case-insensitive search using xpath translate()
         String lower = expectedTitle.toLowerCase();
         By titleCi = By.xpath("//*[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), \"" + lower + "\")] ");
         if (exists(titleCi)) {
             return true;
         }
 
-        // Try scrolling and re-check
         scrollToTop();
         return exists(title) || exists(titleCi);
     }

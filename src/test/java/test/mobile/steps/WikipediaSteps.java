@@ -37,7 +37,6 @@ public class WikipediaSteps {
     @When("I open the first search result for {string}")
     public void openFirstSearchResult(String article) {
         String target = currentArticle != null ? currentArticle : article;
-        // If the article page is already opened by the search step, skip clicking again
         if (articlePage.isTitleDisplayed(target)) {
             return;
         }
@@ -86,8 +85,6 @@ public class WikipediaSteps {
 
     @When("I add the same article to the reading list again")
     public void addSameArticleAgain() {
-        // Re-opening the already saved article/list is intentionally not required here.
-        // The assertion below verifies that the existing item remains unique.
         Assert.assertTrue(lists.containsArticle(currentArticle));
     }
 
