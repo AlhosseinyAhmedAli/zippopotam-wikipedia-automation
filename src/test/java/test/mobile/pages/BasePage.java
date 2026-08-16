@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import org.openqa.selenium.Dimension;
 
 public abstract class BasePage {
@@ -78,7 +80,7 @@ public abstract class BasePage {
 
     protected void tapByAdb(int x, int y) {
         try {
-            Process process = new ProcessBuilder(
+            ProcessBuilder pb = new ProcessBuilder(
                     "adb",
                     "-s",
                     "emulator-5554",
@@ -86,15 +88,50 @@ public abstract class BasePage {
                     "input",
                     "tap",
                     String.valueOf(x),
-                    String.valueOf(y))
-                    .start();
+                    String.valueOf(y));
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append(System.lineSeparator());
+                }
+            }
+
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                throw new IllegalStateException("ADB tap failed at " + x + "," + y + "; exit=" + exitCode);
+                // Try without -s as a fallback (let adb pick the device)
+                ProcessBuilder pb2 = new ProcessBuilder("adb", "shell", "input", "tap", String.valueOf(x), String.valueOf(y));
+                pb2.redirectErrorStream(true);
+                Process process2 = pb2.start();
+                try (BufferedReader reader2 = new BufferedReader(new InputStreamReader(process2.getInputStream()))) {
+                    String line;
+                    while ((line = reader2.readLine()) != null) {
+                        output.append(line).append(System.lineSeparator());
+                    }
+                }
+                int exit2 = process2.waitFor();
+                if (exit2 != 0) {
+                    // Final fallback: try Appium gesture tap
+                    try {
+                        tap(x, y);
+                        return;
+                    } catch (Exception e) {
+                        throw new IllegalStateException("ADB tap failed at " + x + "," + y + "; exit=" + exitCode + "; output=" + output.toString(), e);
+                    }
+                }
             }
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException("Unable to tap via ADB at " + x + "," + y, e);
+            // Fallback to Appium gesture tap
+            try {
+                tap(x, y);
+                return;
+            } catch (Exception inner) {
+                throw new IllegalStateException("Unable to tap via ADB at " + x + "," + y, e);
+            }
         }
     }
 

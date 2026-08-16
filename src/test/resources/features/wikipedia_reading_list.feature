@@ -8,6 +8,7 @@ Feature: Wikipedia Android mobile automation
     And I scroll the article page
     Then the article title "Artificial Intelligence" should be displayed
     And I save the article
+    And I close the application
 
   @mobile @reading-list
   Scenario: Save an article to a new reading list and remove it
@@ -23,3 +24,4 @@ Feature: Wikipedia Android mobile automation
     Then the article "Artificial Intelligence" should appear only once in the reading list
     When I remove the article from the reading list
     Then the article "Artificial Intelligence" should no longer be displayed in the reading list
+    And I close the application

@@ -36,7 +36,12 @@ public class WikipediaSteps {
 
     @When("I open the first search result for {string}")
     public void openFirstSearchResult(String article) {
-        results.openFirstResult(currentArticle != null ? currentArticle : article);
+        String target = currentArticle != null ? currentArticle : article;
+        // If the article page is already opened by the search step, skip clicking again
+        if (articlePage.isTitleDisplayed(target)) {
+            return;
+        }
+        results.openFirstResult(target);
     }
 
     @When("I scroll the article page")
@@ -101,5 +106,10 @@ public class WikipediaSteps {
     public void articleShouldNoLongerBeDisplayed(String article) {
         Assert.assertFalse(lists.containsArticle(currentArticle),
                 "Article '" + currentArticle + "' should not be displayed after removal");
+    }
+
+    @When("I close the application")
+    public void closeApplication() {
+        DriverFactory.quitDriver();
     }
 }

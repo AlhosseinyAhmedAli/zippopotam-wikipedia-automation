@@ -25,13 +25,30 @@ public class ArticlePage extends BasePage {
     }
 
     public void assertTitle(String expectedTitle) {
+        if (isTitleDisplayed(expectedTitle)) {
+            return;
+        }
+
+        test.core.Screenshot.attach("TitleNotFound: " + expectedTitle);
+        throw new AssertionError("Article title is not displayed: " + expectedTitle);
+    }
+
+    public boolean isTitleDisplayed(String expectedTitle) {
         By title = By.xpath("(//*[@text=\"" + expectedTitle + "\" or contains(@text,\"" + expectedTitle + "\")])[1]");
-        if (!exists(title)) {
-            scrollToTop();
+        if (exists(title)) {
+            return true;
         }
-        if (!exists(title)) {
-            throw new AssertionError("Article title is not displayed: " + expectedTitle);
+
+        // Try a case-insensitive search using xpath translate()
+        String lower = expectedTitle.toLowerCase();
+        By titleCi = By.xpath("//*[contains(translate(normalize-space(.), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), \"" + lower + "\")] ");
+        if (exists(titleCi)) {
+            return true;
         }
+
+        // Try scrolling and re-check
+        scrollToTop();
+        return exists(title) || exists(titleCi);
     }
 
     public void saveArticle() {

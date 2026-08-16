@@ -29,6 +29,8 @@ public class HomePage extends BasePage {
     }
 
     public void searchFor(String article) {
+        // Ensure the Wikipedia app is in foreground (some devices may switch to launcher/search overlay)
+        launchActivity("org.wikipedia", "org.wikipedia.main.MainActivity");
         skipFirstRun();
 
         try {
@@ -40,21 +42,33 @@ public class HomePage extends BasePage {
             if (exists(searchBar)) {
                 click(searchBar);
             }
-            // ensure the search container is visible before locating the input
-            visible(searchBar);
+            // Prefer waiting for the search input directly (more stable across app versions)
             WebElement input = visible(searchInput);
             input.clear();
             input.sendKeys(article);
+
+            // Wait for the search result matching the article to appear and click it
+            try {
+                By result = By.xpath("(//*[@text=\"" + article + "\" or contains(@text,\"" + article + "\")])[1]");
+                visible(result);
+                click(result);
+            } catch (Exception ignored) {
+                // ignore: caller may click explicitly
+            }
             return;
         } catch (TimeoutException ignored) {
             // Fallback for the current Wikipedia app: use the Search tab coordinates directly.
         }
 
         tapByAdb(540, 2230);
-        // wait for the search container opened by the tap
-        visible(searchBar);
-        WebElement input = visible(searchInput);
-        input.clear();
-        input.sendKeys(article);
+        // wait for the search input opened by the tap
+        try {
+            WebElement input = visible(searchInput);
+            input.clear();
+            input.sendKeys(article);
+        } catch (Exception e) {
+            test.core.Screenshot.attach("SearchFor-Failure: " + article);
+            throw e;
+        }
     }
 }
